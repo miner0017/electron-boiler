@@ -1,11 +1,15 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, ipcMain} = require('electron')
+const {app, BrowserWindow, ipcMain, dialog} = require('electron')
 const path = require('path')
 
-function handleSetTitle (event, title) {
-  const webContents = event.sender;
-  const win = BrowserWindow.fromWebContents(webContents);
-  win.setTitle(title);
+async function handleFileOpen() {
+  const {canceled, filePaths} = await dialog.showOpenDialog()
+
+  if (canceled) {
+    return
+  } else {
+    return filePaths[0]
+  }
 }
 
 function createWindow () {
@@ -26,8 +30,7 @@ function createWindow () {
 }
 
 app.whenReady().then(() => {
-  ipcMain.on('set-title', handleSetTitle)
-
+  ipcMain.handle('dialog:openFile', handleFileOpen)
   createWindow()
 
   app.on('activate', function () {
